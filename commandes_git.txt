@@ -1,0 +1,9 @@
+git commands :
+
+git init 
+git remote add origin https://github.com/superfonx/orascripts.git     
+git add test.txt
+git commit -m "first commit"  
+git push -u origin master    
+git push --all
+git log   
