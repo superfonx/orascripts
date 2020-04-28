@@ -166,12 +166,22 @@ and db_link is null;
 
 -- Correction - tests de db_links
 
+
 select 
---'connect '||lin.owner||'/XXXXXXXXXXXX'||chr(13)||'drop database link '||db_link||chr(13)--||'create database link '||db_link||' connect to '||lin.username||' identified by '||pwd.pass||' using '''||host||''';'||chr(10)||chr(13)  as commande
-'prompt test de '||owner||'.'||db_link||chr(13)|| 'connect '||owner||'/'||pwd.pass||chr(13)||'select 1 from dual@'||db_link||';'
-from dba_db_links lin inner join export.user_passwords pwd on lin.owner=pwd.username
+'connect '||lin.owner||'/'||pwdowner.pass||chr(13)||'drop database link '||db_link||';'||chr(13)||'create database link '||db_link||' connect to '||lin.username||' identified by '||pwd.pass||' using '''||host||''';'||chr(13)||'select 1 from dual@'||db_link||';'||chr(10)||chr(13)  as commande
+from 
+dba_db_links lin inner join export.user_passwords pwd on lin.username=pwd.username
+inner join export.user_passwords pwdowner on lin.owner=pwdowner.username
 where owner<>'PUBLIC'
-and db_link in ('DBL_EXPLOIT','DBL_ARCH');
+and host like '%CONC_2_CONC%';
+
+
+select 
+'prompt test de '||owner||'.'||db_link||chr(13)|| 'connect '||owner||'/'||pwdowner.pass||chr(13)||'select 1 from dual@'||db_link||';'
+from 
+dba_db_links lin inner join export.user_passwords pwd on lin.username=pwd.username
+inner join export.user_passwords pwdowner on lin.owner=pwdowner.username
+where owner<>'PUBLIC';
 
 
 select distinct owner,object_type,object_name from dba_objects where status='INVALID' and object_type <> 'SYNONYM';

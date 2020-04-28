@@ -1,0 +1,87 @@
+La gestion du wallet passe forcement par le niveau CDB.
+Un wallet (portefeuille) n'ets en fait qu'un répertoire dont les fichiers contiendront les clés.
+
+Par défaut, à la CNP, toutes les bases de données ont déjà un wallet "prêt à configurer".
+
+ATTENTION : Celui ce se trouve FORCEMENT dans /base/oracle/admin/<INSTANCE_NAME>/wallet.
+Si vous voyez autre chose en interrogeant v$encryption_wallet, c'est que vous avez un souci d'environnement.
+
+
+select WRL_PARAMETER, WALLET_TYPE, STATUS from v$encryption_wallet;
+
+WRL_PARAMETER                                                 WALLET_TYPE          STATUS 
+------------------------------------------------------------- -------------------- -------
+/soft/oracle/product/rdbms/12.1.0.2/admin/XOSHR02D1/wallet    UNKNOWN              NOT_AVAILABLE
+
+En effet, pour manipuler les wallets, il faut respecter les conditions de travail suivantes :
+
+> Se connecter sur le server de l'instance cible
+> Fixer son oraenv 
+> Fixer son ORACLE_SID
+> Vérifier que ORACLE_BASE est bien à la valeur /base/oracle
+> Ne surtout pas fixer TNS_ADMIN qui sur certains environnements pointe justement vers un wallet contenant les mots de passe
+
+Si tout cela est ok vous devriez voir SUR LA CDB
+
+WRL_PARAMETER                                                 WALLET_TYPE          STATUS 
+------------------------------------------------------------- -------------------- -------
+/base/oracle/admin/XOSHR02D1/wallet                           UNKNOWN              OPEN_NO_MASTER_KEY
+
+Le fait de la voir en status UNKNOWN signifie que rien n'est initialisé.
+Le OPEN_NO_MASTER_KEY est très parlant : Il n'y a pas encore de master key pour la CDB (ou l'instance 11G classique).
+Cela se vérifie en interrogeant le wallet par les commandes OS :
+
+<CODE>
+oraadm [XOSHR02D1_2] psp855:/base/oracle/admin/XOSHR02D1/wallet $  mkstore -wrl . -list
+Oracle Secret Store Tool : Version 12.1.0.2
+Copyright (c) 2004, 2014, Oracle and/or its affiliates. All rights reserved.
+
+Enter wallet password:
+Oracle Secret Store entries:
+ORACLE.SECURITY.DN
+ORACLE.SECURITY.PASSWORD
+
+</CODE>
+
+On ne voit que les entrées qui correspondent à l'OVD (authentification par LDAP/Oracle)
+
+SANS MASTERKEY, impossible de générer des clés de cryptage. LEs clés de cryptage sont celles qui vont être utilisée pour coder les données en elle même.
+
+A terme, il existera une masterkey pour la CDB et une par PDB.
+
+
+[oracle@psu850 wallet]$ mkstore -wrl . -list
+Oracle Secret Store Tool : Version 12.1.0.2
+Copyright (c) 2004, 2014, Oracle and/or its affiliates. All rights reserved.
+
+Enter wallet password:
+Oracle Secret Store entries:
+ORACLE.SECURITY.DB.ENCRYPTION.AbHsrlO6YU+Dv6s8e6fBxTgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.DB.ENCRYPTION.Ae+8Wlnt0E9/vzVau9T/RUoAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.DB.ENCRYPTION.AR4N1PFDRE8RvyXaJ1SoqvUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.DB.ENCRYPTION.AUJA40cAwk/iv7zYXV8mOvkAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.DB.ENCRYPTION.AWtDkjyAvk9Tvz/5OcFLovUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.DB.ENCRYPTION.MASTERKEY
+ORACLE.SECURITY.DB.ENCRYPTION.MASTERKEY.6296B3C269329C9FE053996C9D9EEDEB
+ORACLE.SECURITY.DN
+ORACLE.SECURITY.ID.ENCRYPTION.
+ORACLE.SECURITY.KB.ENCRYPTION.
+ORACLE.SECURITY.KM.ENCRYPTION.AbHsrlO6YU+Dv6s8e6fBxTgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.KM.ENCRYPTION.Ae+8Wlnt0E9/vzVau9T/RUoAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.KM.ENCRYPTION.AR4N1PFDRE8RvyXaJ1SoqvUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.KM.ENCRYPTION.AUJA40cAwk/iv7zYXV8mOvkAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.KM.ENCRYPTION.AWtDkjyAvk9Tvz/5OcFLovUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+ORACLE.SECURITY.KM.ENCRYPTION.MASTERKEY
+ORACLE.SECURITY.PASSWORD
+[oracle@psu850 wallet]$
+
+SQL> select key_id,ACTIVATING_PDBNAME,ACTIVATING_PDBGUID from v$encryption_keys;
+
+KEY_ID                                                   ACTIVATING_PDBNAME             ACTIVATING_PDBGUID
+-------------------------------------------------------- ------------------------------ --------------------------------
+Ae+8Wlnt0E9/vzVau9T/RUoAAAAAAAAAAAAAAAAAAAAAAAAAAAAA     CDB$ROOT                       4CE3E87E8DF07DE3E0539B6C9D9EBD42
+AWtDkjyAvk9Tvz/5OcFLovUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA     CDB$ROOT                       4CE3E87E8DF07DE3E0539B6C9D9EBD42
+AUJA40cAwk/iv7zYXV8mOvkAAAAAAAAAAAAAAAAAAAAAAAAAAAAA     CDB$ROOT                       4CE3E87E8DF07DE3E0539B6C9D9EBD42
+AbHsrlO6YU+Dv6s8e6fBxTgAAAAAAAAAAAAAAAAAAAAAAAAAAAAA     CDB$ROOT                       4CE3E87E8DF07DE3E0539B6C9D9EBD42
+AR4N1PFDRE8RvyXaJ1SoqvUAAAAAAAAAAAAAAAAAAAAAAAAAAAAA     PDB_POPAE01                    6296B3C269329C9FE053996C9D9EEDEB
+
