@@ -9,12 +9,12 @@ Auteur : Sylvain FAUVEL / sylvain.fauvel@gmail.com
 
 *******************************************************************************************
 
-Concept :
+I : Concept :
 *******************************************************************************************
 
 spreport_auto_v2 generates a script that will then be used to create statspack reports.
 
-Installation : 
+II : Installation : 
 *******************************************************************************************
 
 1) Copy the script in the folder where you want to generate your statspack reports
@@ -45,7 +45,7 @@ NB : If there are no snapshots matching HH24_START_SNAP or HH24_END_SNAP paramet
 So choose these values according to your snapshot schedule
 >>>>>>>>>>>>>>>>>>>>>>>>>> WARNING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-Use 
+III : Use 
 *******************************************************************************************
 
 1) run spreport_auto_v2.sql
@@ -54,7 +54,7 @@ Use
 
 3) Run generated it and get your reports in current folder.
 
-Sample  
+IV : Sample  
 *******************************************************************************************
 
 [oracle@localhost sf_orascripts]$ sqlplus perfstat/perfstat @/media/sf_orascripts/spreport_auto_v2.sql

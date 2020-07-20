@@ -3,7 +3,7 @@ REM Used to create multiple statspack reports between two snapshots
 REM Start one is taken around '07' and end one around '19'
 REM Period is from the last 10 days for 9
 
-REM Created by user PERFSTAT on localhost at 14-MAY-2020 14:45                                                                                                                                                                                                                                              
+REM Created by user PERFSTAT on localhost at 14-MAY-2020 17:36                                                                                                                                                                                                                                              
 prompt Beginning statspack generation...                                                                                                                                                                                                                                                                    
 set heading off feedback off lines 800 pages 5000 trimspool on trimout on                                                                                                                                                                                                                                   
 ------------------------------------------------------------------------------------------------------                                                                                                                                                                                                      

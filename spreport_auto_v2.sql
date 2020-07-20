@@ -116,7 +116,7 @@ BEGIN
 	    into vdbid,vinst_num,vstart_snap_id
 		from STATS$SNAPSHOT s 
 		where 
-		   to_char(s.snap_time,'HH24')=  '07'
+		   to_char(s.snap_time,'HH24')=  &&HH24_START_SNAP
 		   and trunc(snap_time) = cr_days.snap_day
 		   and dbid=cr_days.dbid
 		   and instance_number=cr_days.inst_num
@@ -136,7 +136,7 @@ BEGIN
 		into vdbid,vinst_num,vend_snap_id
 		from STATS$SNAPSHOT s 
 		where 
-		   to_char(s.snap_time,'HH24')=  '19'
+		   to_char(s.snap_time,'HH24')=  &&HH24_END_SNAP
 		   and trunc(snap_time) = cr_days.snap_day
 		   and dbid=cr_days.dbid
 		   and instance_number=cr_days.inst_num
